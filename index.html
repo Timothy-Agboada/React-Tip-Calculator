@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 23: React Tip Calculator</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+</head>
+<body class="bg-teal-50 flex items-center justify-center min-h-screen p-4">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        // --- Reusable Child Components ---
+        const InputBill = ({ bill, onSetBill }) => (
+            <div>
+                <label className="font-bold text-gray-500">Bill</label>
+                <div className="relative mt-2">
+                    <i className="fas fa-dollar-sign absolute left-4 top-1/2 -translate-y-1/2 text-teal-500"></i>
+                    <input
+                        type="number"
+                        value={bill}
+                        onChange={(e) => onSetBill(e.target.value)}
+                        placeholder="0"
+                        className="w-full bg-gray-100 text-2xl font-bold text-right text-teal-800 p-3 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                </div>
+            </div>
+        );
+
+        const SelectTip = ({ tip, onSetTip }) => {
+            const tipPercentages = [5, 10, 15, 25, 50];
+            return (
+                <div>
+                    <label className="font-bold text-gray-500">Select Tip %</label>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                        {tipPercentages.map(percent => (
+                            <button
+                                key={percent}
+                                onClick={() => onSetTip(percent)}
+                                className={`py-2 px-4 rounded-md font-bold transition-colors ${tip === percent ? 'bg-teal-500 text-white' : 'bg-teal-100 text-teal-800 hover:bg-teal-200'}`}
+                            >
+                                {percent}%
+                            </button>
+                        ))}
+                        {/* Custom tip input could be added here */}
+                    </div>
+                </div>
+            );
+        };
+        
+        const InputPeople = ({ people, onSetPeople }) => (
+             <div>
+                <label className="font-bold text-gray-500">Number of People</label>
+                <div className="relative mt-2">
+                    <i className="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-teal-500"></i>
+                    <input
+                        type="number"
+                        value={people}
+                        onChange={(e) => onSetPeople(e.target.value)}
+                        placeholder="1"
+                        className="w-full bg-gray-100 text-2xl font-bold text-right text-teal-800 p-3 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                </div>
+            </div>
+        );
+
+        const OutputDisplay = ({ label, amount }) => (
+            <div className="flex justify-between items-center">
+                <div>
+                    <p className="text-white font-bold">{label}</p>
+                    <p className="text-sm text-teal-200">/ person</p>
+                </div>
+                <p className="text-4xl font-bold text-teal-200">${amount}</p>
+            </div>
+        );
+
+        // --- Main App Component ---
+        const App = () => {
+            const [bill, setBill] = React.useState('');
+            const [tip, setTip] = React.useState(15);
+            const [people, setPeople] = React.useState(1);
+            
+            const handleReset = () => {
+                setBill('');
+                setTip(15);
+                setPeople(1);
+            };
+
+            const billValue = parseFloat(bill);
+            const peopleValue = parseInt(people, 10);
+
+            let tipAmountPerPerson = 0;
+            let totalPerPerson = 0;
+
+            if (billValue > 0 && peopleValue > 0) {
+                const tipTotal = billValue * (tip / 100);
+                const totalBill = billValue + tipTotal;
+                tipAmountPerPerson = tipTotal / peopleValue;
+                totalPerPerson = totalBill / peopleValue;
+            }
+            
+            return (
+                <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Input Section */}
+                    <div className="p-4 space-y-6">
+                        <InputBill bill={bill} onSetBill={setBill} />
+                        <SelectTip tip={tip} onSetTip={setTip} />
+                        <InputPeople people={people} onSetPeople={setPeople} />
+                    </div>
+
+                    {/* Output Section */}
+                    <div className="bg-teal-700 rounded-xl p-8 flex flex-col justify-between">
+                        <div className="space-y-8">
+                            <OutputDisplay label="Tip Amount" amount={tipAmountPerPerson.toFixed(2)} />
+                            <OutputDisplay label="Total" amount={totalPerPerson.toFixed(2)} />
+                        </div>
+                        <button 
+                            onClick={handleReset}
+                            className="w-full mt-8 bg-teal-500 text-teal-900 font-bold text-xl py-3 rounded-md uppercase hover:bg-teal-400 transition-colors disabled:bg-teal-800 disabled:cursor-not-allowed"
+                            disabled={!bill && people === 1}
+                        >
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Rendering the App ---
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+
+</body>
+</html>
